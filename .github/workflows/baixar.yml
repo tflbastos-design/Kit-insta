@@ -1,0 +1,25 @@
+name: Baixar imagens
+on:
+  push:
+    paths: ['baixar/urls.txt']
+permissions:
+  contents: write
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar
+        run: |
+          mkdir -p gen
+          while read -r nome url; do
+            [ -z "$nome" ] && continue
+            curl -sSL -o "gen/$nome" "$url"
+          done < baixar/urls.txt
+      - name: Salvar
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add gen
+          git commit -m "Imagens baixadas" || exit 0
+          git push
